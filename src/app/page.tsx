@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { ChangeEvent, useState } from "react"
 
 import { Input } from "@/components/ui/input"
 
@@ -17,9 +17,14 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { Info } from "@/components/me/Info"
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCircleInfo, faRightFromBracket, faSliders } from '@fortawesome/free-solid-svg-icons'
+import { DropdownMenu, DropdownMenuSeparator, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu"
+import { DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel } from "@/components/ui/dropdown-menu"
+
 export default function Home() {
 
-  const [showCard, showCardState] = useState<boolean>(true)
+  const [showCard, showCardState] = useState<boolean>(false)
 
   return (
     <div className="flex justify-center items-center h-screen w-full flex-col gap-4">
@@ -31,15 +36,39 @@ export default function Home() {
         </CardHeader>
         <CardContent>
           <ScrollArea className="flex">
-            <Button variant="default" className="m-1 bg-blue-500 text-white font-bold cursor-pointer">XXXXX-XX</Button>
+            <Button
+              variant="default"
+              className="m-1 bg-blue-500 text-white font-bold cursor-pointer"
+              onClick={(() => showCardState(true))}
+            >
+              XXXXX-XX
+            </Button>
           </ScrollArea>
         </CardContent>
       </Card>
       {
         showCard && (
-          <div className="absolute bg-white h-screen inset-0 flex justify-center items-center">
+          <div className="absolute bg-white h-screen inset-0 flex flex-col justify-center items-center">
             <Card className="border-2 border-blue-500 w-2xl flex-wrap">
-              <CardHeader>
+              <CardHeader className="flex flex-row justify-end h-4 w-full items-center">
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <FontAwesomeIcon icon={faSliders} width={30} className="text-xl cursor-pointer text-blue-500" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 bg-white border-2 border-blue-500">
+                    <DropdownMenuLabel>Opções</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem className="cursor-pointer">
+                      Mudar localilzação
+                    </DropdownMenuCheckboxItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <FontAwesomeIcon icon={faRightFromBracket} width={30} className="text-xl text-red-500 cursor-pointer" onClick={(() => {
+                  showCardState(false)
+                })} />
+              </CardHeader>
+              <CardHeader className="flex flex-row h-4 w-8/10 items-center">
+                <FontAwesomeIcon icon={faCircleInfo} width={30} />
                 <CardTitle>Infornações do equipamento</CardTitle>
               </CardHeader>
               <CardContent className="flex gap-1 justify-between flex-wrap">
@@ -50,7 +79,8 @@ export default function Home() {
                 <Info label="Nº de serie" value="XXXXX-XXXXX-XX" w="w-104" />
                 <Info label="Descrição" value="Qualquer descrição" w="w-full" />
               </CardContent>
-              <CardHeader>
+              <CardHeader className="flex flex-row h-4 w-8/10 items-center">
+                <FontAwesomeIcon icon={faCircleInfo} width={30} />
                 <CardTitle>Infornações da calibração do equipamento</CardTitle>
               </CardHeader>
               <CardContent className="flex gap-1 justify-between flex-wrap">
@@ -58,7 +88,8 @@ export default function Home() {
                 <Info label="Frquência" value="12 meses" w="w-42" />
                 <Info label="Próxima calibração" value="Maio/2026" w="w-72" />
               </CardContent>
-              <CardHeader>
+              <CardHeader className="flex flex-row h-4 w-8/10 items-center">
+                <FontAwesomeIcon icon={faCircleInfo} width={30} />
                 <CardTitle>Infornações da localização do equipamento</CardTitle>
               </CardHeader>
               <CardContent className="flex gap-1 justify-between flex-wrap">

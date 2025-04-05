@@ -8,7 +8,7 @@ interface InfoProps {
 
 export const Info = ({ label, value, w }: InfoProps) => {
     return (
-        <div className={`flex gap-1 rounded-md bg-blue-200 p-1 ${w} font-semibold`}>
+        <div className={`flex gap-1 rounded-md bg-blue-100 p-1 ${w} font-semibold`}>
             <p className="bold">{label}</p>
             <p>: </p>
             <p className='font-normal'>{value}</p>
