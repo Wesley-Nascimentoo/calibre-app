@@ -25,6 +25,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
+import { Toaster } from "@/components/ui/sonner"
+import { toast } from "sonner"
+
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 import { Button } from "@/components/ui/button"
@@ -110,6 +113,8 @@ export default function Home() {
 
   const [calibrators, setCalibrators] = useState<Calibrator[]>()
 
+  const [calibratorWithFilter, setCalibratorWithFilter] = useState<Calibrator[]>(calibrators as Calibrator[])
+
   const [selected, setSelected] = useState<Calibrator>(mockCalibrator)
 
   const [changeLocation, setChangeLocation] = useState<boolean>(false)
@@ -156,12 +161,15 @@ export default function Home() {
   const [newCalibrationNextCalibration, setNewCalibrationNextCalibration] = useState<string>('')              // Próxima calibração (MM/yyyy)
   const [newProcessTolerance, setNewProcessTolerance] = useState<string>('')
 
-  const [area, setArea] = useState<string>('')                          // Área
-  const [location, setLocation] = useState<string>('')                  // Local
-  const [locationObservation, setLocationObservation] = useState<string>('') // Observação de localização
+  const [area, setArea] = useState<string>('')
+  const [location, setLocation] = useState<string>('')
+  const [locationObservation, setLocationObservation] = useState<string>('')
 
   useEffect(() => {
-    axios.get('http://localhost:5002/calibrator').then(response => setCalibrators(response.data))
+    axios.get('http://localhost:5002/calibrator').then(response => {
+      setCalibrators(response.data)
+      setCalibratorWithFilter(response.data)
+    })
   }, [showCard, registerNewCalibrator])
 
   const changeLocationApi = () => {
@@ -172,12 +180,12 @@ export default function Home() {
       observation,
       currentLocationId: historicLocation[historicLocation.length - 1].id
     }).then(async (response) => {
-      alert('Localização do calibrador atualizado com sucesso!')
+      toast.success('Localização do calibrador atualizada com sucesso!')
       await getHistoric(selected.code)
       setChangeLocation(false)
       showCardState(false)
       showCardState(true)
-    })
+    }).catch((error) => toast.error("Erro ao atualizar informações"))
   }
 
   const updateCalibratorInfos = () => {
@@ -191,11 +199,11 @@ export default function Home() {
       newDescription,
       newObservation
     }).then(async (response) => {
-      alert('Informações do calibrador atualizadas com sucesso!')
+      toast.success('Informações do calibrador atualizadas com sucesso!')
       await setSelected(response.data)
       console.log(response.data)
       setChangeCalibratorInfos(false)
-    })
+    }).catch((error) => toast.error("Erro ao atualizar informações"))
   }
 
   const updateCalibrationInfos = () => {
@@ -207,11 +215,11 @@ export default function Home() {
       toleranceProcess,
       calibrationDataId: selected.calibrationDataId
     }).then(async (response) => {
-      alert('Informações do calibração atualizadas com sucesso!')
+      toast.success('Informações da calibração atualizadas com sucesso!')
       await setSelected(response.data)
       console.log(response.data)
       setChangeCalibrationInfos(false)
-    })
+    }).catch((error) => toast.error("Erro ao atualizar informações"))
   }
 
 
@@ -228,7 +236,6 @@ export default function Home() {
 
   useEffect(() => {
     if (historicLocation.length > 0) {
-      console.log('Atualizou historicLocation:', historicLocation);
       setCurrentLocationHistoricIndex(historicLocation.length - 1);
     }
   }, [historicLocation]);
@@ -257,17 +264,37 @@ export default function Home() {
       }
     }).then(
       response => {
-        alert('Calibrador registrado com sucesso!')
+        toast.success('Calibrador registrado com sucesso!')
         setRegisterNewCalibrator(false)
 
       }
-    )
+    ).catch((error) => toast.error("Erro ao cadastrar calibrador"))
   }
 
   return (
     <div className="flex justify-center items-center h-screen w-full flex-col gap-4">
+      <Toaster position="top-right" className="bg-blue-600" />
       <div className="flex items-center gap-2">
-        <Input type="text" placeholder="Pesquise o código do calibrador aqui" className="w-80 text-blue-500 font-bold" />
+        <Input
+          type="text"
+          placeholder="Pesquise o código do calibrador aqui"
+          className="w-80 text-blue-500 font-bold"
+          onChange={(ev: ChangeEvent<HTMLInputElement>) => {
+            const valor = ev.target.value.toLowerCase();
+
+            if (valor === '') {
+              // Se estiver vazio, volta para a lista original
+              setCalibratorWithFilter(calibrators as Calibrator[]);
+            } else {
+              // Filtra com base na lista original
+              setCalibratorWithFilter(
+                (calibrators as Calibrator[]).filter((item) =>
+                  item.code.toLowerCase().includes(valor)
+                )
+              );
+            }
+          }}
+        />
         <FontAwesomeIcon
           icon={faPlusCircle}
           className="cursor-pointer text-blue-500 text-2xl"
@@ -282,7 +309,7 @@ export default function Home() {
         <CardContent>
           <ScrollArea className="flex">
             {
-              calibrators?.map((calibrator, i) => (
+              calibratorWithFilter?.map((calibrator, i) => (
                 <Button
                   key={i}
                   variant="default"
@@ -402,7 +429,7 @@ export default function Home() {
                       if (currentLocationHistoricIndex > 0) {
                         setCurrentLocationHistoricIndex(prev => prev - 1)
                       } else {
-                        alert('Você já está na localização mais antiga!')
+                        toast.info('Você já está na localização mais antiga!')
                       }
                     }}
                   />
@@ -413,7 +440,7 @@ export default function Home() {
                       if (currentLocationHistoricIndex < historicLocation.length - 1) {
                         setCurrentLocationHistoricIndex(prev => prev + 1)
                       } else {
-                        alert('Você já está na localização mais recente!')
+                        toast.info('Você já está na localização mais recente!')
                       }
                     }}
                   />
