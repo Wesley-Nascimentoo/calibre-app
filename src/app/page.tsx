@@ -43,6 +43,10 @@ import InputWithLabel from "@/components/me/input-with-label"
 
 import { Textarea } from "@/components/ui/textarea"
 
+import QRCode from 'react-qr-code';
+import { useParams } from "next/navigation"
+
+
 interface CalibrationData {
   id: number;
   calibratorCode: string;
@@ -234,11 +238,20 @@ export default function Home() {
     })
   }
 
+  const params = useParams()
+  const code = params.code as string
+
+
   useEffect(() => {
-    if (historicLocation.length > 0) {
-      setCurrentLocationHistoricIndex(historicLocation.length - 1);
+    if (code && calibrators?.length) {
+      const found = calibrators.find(cal => cal.code === code)
+      if (found) {
+        setSelected(found)
+        showCardState(true)
+        getHistoric(code)
+      }
     }
-  }, [historicLocation]);
+  }, [code, calibrators])
 
   const handleRegisterNewCalibrator = () => {
     axios.post('http://localhost:5002/calibrator', {
@@ -270,6 +283,9 @@ export default function Home() {
       }
     ).catch((error) => toast.error("Erro ao cadastrar calibrador"))
   }
+
+  const [generateLabel, setGenerateLabel] = useState<boolean>(false)
+
 
   return (
     <div className="flex justify-center items-center h-screen w-full flex-col gap-4">
@@ -331,57 +347,68 @@ export default function Home() {
         showCard && (
           <div className="absolute bg-white h-screen inset-0 flex flex-col justify-center items-center">
             <Card className="border-2 border-blue-500 w-2xl flex-wrap">
-              <CardHeader className="flex flex-row justify-end h-4 w-full items-center">
-                <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <FontAwesomeIcon icon={faSliders} width={30} className="text-xl cursor-pointer text-blue-500" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 bg-white border-2 border-blue-500">
-                    <DropdownMenuLabel>Opções</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuCheckboxItem
-                      className="cursor-pointer"
-                      checked={changeLocation}
-                      onCheckedChange={setChangeLocation}
-                    >
-                      Mudar localilzação
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      className="cursor-pointer"
-                      checked={changeCalibratorInfos}
-                      onCheckedChange={setChangeCalibratorInfos}
-                      onClick={(() => {
-                        setNewCode(selected.code)
-                        setNewModel(selected.model)
-                        setNewStatus(selected.status)
-                        setNewCertificate(selected.certificate)
-                        setNewSerialNumber(selected.serialNumber)
-                        setNewDescription(selected.description)
-                        setNewObservation(selected.observation)
-                      })}
-                    >
-                      Editar informações do equipamento
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      className="cursor-pointer"
-                      checked={changeCalibrationInfos}
-                      onCheckedChange={setChangeCalibrationInfos}
-                      onClick={() => {
-                        setDate(selected.calibrationData.date)
-                        setNewFrequency(selected.calibrationData.frequency)
-                        setNextCalibration(selected.calibrationData.next)
-                        setToleranceProcess(selected.calibrationData.toleranceProcess)
-                      }}
-                    >
-                      Editar informações de calibração
-                    </DropdownMenuCheckboxItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <FontAwesomeIcon icon={faRightFromBracket} width={30} className="text-xl text-red-500 cursor-pointer" onClick={(() => {
-                  showCardState(false)
-                })} />
+              <CardHeader className="flex flex-row justify-between h-4 w-full items-center mb-2">
+                <QRCode value={`http://localhost:3000/${selected.code}`} className="w-10 h-10" />
+                <div className="flex">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <FontAwesomeIcon icon={faSliders} width={30} className="text-xl cursor-pointer text-blue-500" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 bg-white border-2 border-blue-500">
+                      <DropdownMenuLabel>Opções</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuCheckboxItem
+                        className="cursor-pointer"
+                        checked={changeLocation}
+                        onCheckedChange={setChangeLocation}
+                      >
+                        Mudar localilzação
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem
+                        className="cursor-pointer"
+                        checked={changeCalibratorInfos}
+                        onCheckedChange={setChangeCalibratorInfos}
+                        onClick={(() => {
+                          setNewCode(selected.code)
+                          setNewModel(selected.model)
+                          setNewStatus(selected.status)
+                          setNewCertificate(selected.certificate)
+                          setNewSerialNumber(selected.serialNumber)
+                          setNewDescription(selected.description)
+                          setNewObservation(selected.observation)
+                        })}
+                      >
+                        Editar informações do equipamento
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem
+                        className="cursor-pointer"
+                        checked={changeCalibrationInfos}
+                        onCheckedChange={setChangeCalibrationInfos}
+                        onClick={() => {
+                          setDate(selected.calibrationData.date)
+                          setNewFrequency(selected.calibrationData.frequency)
+                          setNextCalibration(selected.calibrationData.next)
+                          setToleranceProcess(selected.calibrationData.toleranceProcess)
+                        }}
+                      >
+                        Editar informações de calibração
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setGenerateLabel(true)
+                        }}
+                      >
+                        Gerar etiqueta para impressão
+                      </DropdownMenuCheckboxItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <FontAwesomeIcon icon={faRightFromBracket} width={30} className="text-xl text-red-500 cursor-pointer" onClick={(() => {
+                    showCardState(false)
+                  })} />
+                </div>
               </CardHeader>
-              <CardHeader className="flex flex-row h-4 w-8/10 items-center">
+              <CardHeader className="flex flex-row h-4  items-center">
                 <FontAwesomeIcon icon={faCircleInfo} width={30} />
                 <CardTitle>Informações do equipamento</CardTitle>
               </CardHeader>
@@ -850,6 +877,21 @@ export default function Home() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        )
+      }
+      {
+        generateLabel && (
+          <div className="absolute bg-white h-screen inset-0 flex flex-col justify-center items-center">
+            <FontAwesomeIcon
+              icon={faRightFromBracket}
+              className="text-red-500 text-xl cursor-pointer fixed top-5 right-5"
+              onClick={(() => setGenerateLabel(false))}
+            />
+            <div className="flex flex-col items-center border-2 p-2 rounded-md">
+              <QRCode value={`http://localhost:3000/${selected.code}`} className="w-36 h-36" />
+              <p>{selected.code}</p>
+            </div>
           </div>
         )
       }
