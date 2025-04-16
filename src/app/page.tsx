@@ -170,14 +170,14 @@ export default function Home() {
   const [locationObservation, setLocationObservation] = useState<string>('')
 
   useEffect(() => {
-    axios.get('http://localhost:5002/calibrator').then(response => {
+    axios.get('http://10.12.100.156:5002/calibrator').then(response => {
       setCalibrators(response.data)
       setCalibratorWithFilter(response.data)
     })
   }, [showCard, registerNewCalibrator])
 
   const changeLocationApi = () => {
-    axios.put('http://localhost:5002/location', {
+    axios.put('http://10.12.100.156:5002/location', {
       calibratorId: selected.code,
       newDepartment,
       newLocation,
@@ -193,7 +193,7 @@ export default function Home() {
   }
 
   const updateCalibratorInfos = () => {
-    axios.put('http://localhost:5002/calibrator', {
+    axios.put('http://10.12.100.156:5002/calibrator', {
       code: selected.code,
       newCode,
       newModel,
@@ -211,7 +211,7 @@ export default function Home() {
   }
 
   const updateCalibrationInfos = () => {
-    axios.put('http://localhost:5002/calibration', {
+    axios.put('http://10.12.100.156:5002/calibration', {
       calibratorCode: selected.code,
       date: date,
       newFrequency: newFrenquecy,
@@ -228,7 +228,7 @@ export default function Home() {
 
 
   const getHistoric = async (id: string) => {
-    axios.get('http://localhost:5002/location', {
+    axios.get('http://10.12.100.156:5002/location', {
       params: {
         code: id
       }
@@ -254,7 +254,7 @@ export default function Home() {
   }, [code, calibrators])
 
   const handleRegisterNewCalibrator = () => {
-    axios.post('http://localhost:5002/calibrator', {
+    axios.post('http://10.12.100.156:5002/calibrator', {
       code: newCalibratorCode,
       model: newCalibratorModel,
       status: newCalibratorStatus,
@@ -348,7 +348,7 @@ export default function Home() {
           <div className="absolute bg-white h-screen inset-0 flex flex-col justify-center items-center">
             <Card className="border-2 border-blue-500 w-2xl flex-wrap">
               <CardHeader className="flex flex-row justify-between h-4 w-full items-center mb-2">
-                <QRCode value={`http://localhost:3000/${selected.code}`} className="w-10 h-10" />
+                <QRCode value={`http://10.12.100.156:3000/${selected.code}`} className="w-10 h-10" />
                 <div className="flex">
                   <DropdownMenu>
                     <DropdownMenuTrigger>
@@ -889,7 +889,7 @@ export default function Home() {
               onClick={(() => setGenerateLabel(false))}
             />
             <div className="flex flex-col items-center border-2 p-2 rounded-md">
-              <QRCode value={`http://localhost:3000/${selected.code}`} className="w-36 h-36" />
+              <QRCode value={`http://10.12.100.156:3000/${selected.code}`} className="w-36 h-36" />
               <p>{selected.code}</p>
             </div>
           </div>
