@@ -184,7 +184,7 @@ export default function Home() {
       observation,
       currentLocationId: historicLocation[historicLocation.length - 1].id
     }).then(async (response) => {
-      toast.success('Localização do calibrador atualizada com sucesso!')
+      toast.success('Localização do equipamento atualizada com sucesso!')
       await getHistoric(selected.code)
       setChangeLocation(false)
       showCardState(false)
@@ -203,7 +203,7 @@ export default function Home() {
       newDescription,
       newObservation
     }).then(async (response) => {
-      toast.success('Informações do calibrador atualizadas com sucesso!')
+      toast.success('Informações do equipamento atualizadas com sucesso!')
       await setSelected(response.data)
       console.log(response.data)
       setChangeCalibratorInfos(false)
@@ -269,19 +269,22 @@ export default function Home() {
         toleranceProcess: newProcessTolerance
       },
       locationData: {
-        entryDate: format(new Date().toLocaleDateString('pt-br'), 'dd/MM/yyyy'),
+        entryDate: new Date().toLocaleDateString('pt-br'),
         leaveDate: 'hoje',
         location: location,
         department: area,
         observation: locationObservation
       }
     }).then(
-      response => {
-        toast.success('Calibrador registrado com sucesso!')
+      (response) => {
+        toast.success('Equipamento registrado com sucesso!')
         setRegisterNewCalibrator(false)
 
       }
-    ).catch((error) => toast.error("Erro ao cadastrar calibrador"))
+    ).catch((error) => { 
+      toast.error("Erro ao cadastrar equipamento")
+      console.log(error)
+    })
   }
 
   const [generateLabel, setGenerateLabel] = useState<boolean>(false)
@@ -293,7 +296,7 @@ export default function Home() {
       <div className="flex items-center gap-2">
         <Input
           type="text"
-          placeholder="Pesquise o código do calibrador aqui"
+          placeholder="Pesquise o código do equipamento aqui"
           className="w-80 text-blue-500 font-bold"
           onChange={(ev: ChangeEvent<HTMLInputElement>) => {
             const valor = ev.target.value.toLowerCase();
@@ -319,7 +322,7 @@ export default function Home() {
       </div>
       <Card className="h-[400px] w-4xl border-2 border-blue-500">
         <CardHeader>
-          <CardTitle className="text-center text-xl font-bold">Calibradores cadastrados</CardTitle>
+          <CardTitle className="text-center text-xl font-bold">Equipamento cadastrados</CardTitle>
           <CardDescription className="text-center">Clique no código desejado para abrir seu card e ver suas inoformações</CardDescription>
         </CardHeader>
         <CardContent>
@@ -539,8 +542,8 @@ export default function Home() {
                       />
                     </div>
                     <CardHeader>
-                      <CardTitle>Edição de informações do calibrador {selected.code}</CardTitle>
-                      <CardDescription>Edite as informações do calibrador aqui</CardDescription>
+                      <CardTitle>Edição de informações do equipamento {selected.code}</CardTitle>
+                      <CardDescription>Edite as informações do equipamento aqui</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col gap-2">
                       <InputWithLabel
@@ -715,7 +718,7 @@ export default function Home() {
                 />
               </div>
               <CardHeader>
-                <CardTitle>Forneça as informações do calibrador</CardTitle>
+                <CardTitle>Forneça as informações do equipamento</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-wrap gap-2 w-full">
                 <InputWithLabel
@@ -872,7 +875,7 @@ export default function Home() {
                       handleRegisterNewCalibrator()
                     }}
                   >
-                    Registrar novo calibrador
+                    Registrar novo equipamento
                   </Button>
                 </div>
               </CardContent>
