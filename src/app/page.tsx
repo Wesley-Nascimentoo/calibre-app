@@ -54,6 +54,7 @@ interface CalibrationData {
   frequency: string;
   next: string; // ou Date
   toleranceProcess: string
+  toleranceEquipment: string
 }
 
 interface LocationData {
@@ -98,7 +99,8 @@ const mockCalibrator: Calibrator = {
     date: "2025-04-05T00:00:00.000Z",
     frequency: "Anual",
     next: "2026-01-01T03:00:00.000Z",
-    toleranceProcess: "dsd"
+    toleranceProcess: "dsd",
+    toleranceEquipment: "dsd"
   },
   locationData: {
     id: 1,
@@ -147,6 +149,7 @@ export default function Home() {
   const [newFrenquecy, setNewFrequency] = useState<string>(selected.calibrationData.frequency)
   const [nextCalibration, setNextCalibration] = useState<string>(selected.calibrationData.next)
   const [toleranceProcess, setToleranceProcess] = useState<string>(selected.calibrationData.toleranceProcess)
+  const [toleranceEquipment, setToleranceEquipment] = useState<string>(selected.calibrationData.toleranceEquipment)
 
 
   //para criar cadastrar um novo calibrador
@@ -164,24 +167,25 @@ export default function Home() {
   const [newCalibrationFrequency, setNewCalibrationFrequency] = useState<string>('')                    // Frequência (meses)
   const [newCalibrationNextCalibration, setNewCalibrationNextCalibration] = useState<string>('')              // Próxima calibração (MM/yyyy)
   const [newProcessTolerance, setNewProcessTolerance] = useState<string>('')
+  const [newProcessEquipment, setNewProcessEquipment] = useState<string>('')
 
   const [area, setArea] = useState<string>('')
   const [location, setLocation] = useState<string>('')
   const [locationObservation, setLocationObservation] = useState<string>('')
 
   useEffect(() => {
-    axios.get('http://10.12.100.156:5002/calibrator').then(response => {
+    axios.get(`${process.env.NEXT_PUBLIC_URL_API_DEV}/calibrator`).then(response => {
       setCalibrators(response.data)
       setCalibratorWithFilter(response.data)
     })
   }, [showCard, registerNewCalibrator])
 
   const changeLocationApi = () => {
-    axios.put('http://10.12.100.156:5002/location', {
+    axios.put(`${process.env.NEXT_PUBLIC_URL_API_DEV}/location`, {
       calibratorId: selected.code,
       newDepartment,
       newLocation,
-      observation,
+      observation, 
       currentLocationId: historicLocation[historicLocation.length - 1].id
     }).then(async (response) => {
       toast.success('Localização do equipamento atualizada com sucesso!')
@@ -193,13 +197,13 @@ export default function Home() {
   }
 
   const updateCalibratorInfos = () => {
-    axios.put('http://10.12.100.156:5002/calibrator', {
+    axios.put(`${process.env.NEXT_PUBLIC_URL_API_DEV}/calibrator`, {
       code: selected.code,
       newCode,
       newModel,
       newStatus,
       newCertificate,
-      newSerialNumber,
+      newSerialNumber, 
       newDescription,
       newObservation
     }).then(async (response) => {
@@ -211,13 +215,14 @@ export default function Home() {
   }
 
   const updateCalibrationInfos = () => {
-    axios.put('http://10.12.100.156:5002/calibration', {
+    axios.put(`${process.env.NEXT_PUBLIC_URL_API_DEV}/calibration`, {
       calibratorCode: selected.code,
       date: date,
       newFrequency: newFrenquecy,
       nextCalibration,
       toleranceProcess,
-      calibrationDataId: selected.calibrationDataId
+      calibrationDataId: selected.calibrationDataId,
+      toleranceEquipment,
     }).then(async (response) => {
       toast.success('Informações da calibração atualizadas com sucesso!')
       await setSelected(response.data)
@@ -228,7 +233,7 @@ export default function Home() {
 
 
   const getHistoric = async (id: string) => {
-    axios.get('http://10.12.100.156:5002/location', {
+    axios.get(`${process.env.NEXT_PUBLIC_URL_API_DEV}/location`, {
       params: {
         code: id
       }
@@ -254,7 +259,7 @@ export default function Home() {
   }, [code, calibrators])
 
   const handleRegisterNewCalibrator = () => {
-    axios.post('http://10.12.100.156:5002/calibrator', {
+    axios.post(`${process.env.NEXT_PUBLIC_URL_API_DEV}/calibrator`, {
       code: newCalibratorCode,
       model: newCalibratorModel,
       status: newCalibratorStatus,
@@ -266,7 +271,8 @@ export default function Home() {
         date: format(calibrationDate, 'dd/MM/yyyy'),
         frequency: newCalibrationFrequency,
         next: newCalibrationNextCalibration,
-        toleranceProcess: newProcessTolerance
+        toleranceProcess: newProcessTolerance,
+        toleranceEquipment: newProcessEquipment
       },
       locationData: {
         entryDate: new Date().toLocaleDateString('pt-br'),
@@ -433,6 +439,7 @@ export default function Home() {
                 <Info label="Frequência (meses)" value={selected?.calibrationData?.frequency} w="w-54" />
                 <Info label="Próxima calibração" value={selected?.calibrationData?.next} w="w-60" />
                 <Info label="Tolerância do processo" value={selected?.calibrationData?.toleranceProcess} w="w-full" />
+                <Info label="Tolerância do equipamento" value={selected?.calibrationData?.toleranceEquipment} w="w-full" />
               </CardContent>
               <CardHeader className="flex flex-row h-4 w-8/10 items-center">
                 <FontAwesomeIcon icon={faCircleInfo} width={30} />
@@ -533,8 +540,8 @@ export default function Home() {
             {
               changeCalibratorInfos && (
                 <div className="absolute bg-white h-screen inset-0 flex flex-col justify-center items-center">
-                  <Card className="w-90">
-                    <div className="flex w-85 justify-end">
+                  <Card className="w-200">
+                    <div className="flex w-195 justify-end">
                       <FontAwesomeIcon
                         icon={faRightFromBracket}
                         className="text-red-500 text-xl cursor-pointer"
@@ -545,18 +552,20 @@ export default function Home() {
                       <CardTitle>Edição de informações do equipamento {selected.code}</CardTitle>
                       <CardDescription>Edite as informações do equipamento aqui</CardDescription>
                     </CardHeader>
-                    <CardContent className="flex flex-col gap-2">
+                    <CardContent className="flex flex-wrap gap-2 justify-between">
                       <InputWithLabel
                         label="Código"
                         placeholder="Digite o novo código aqui"
                         value={newCode}
                         setValue={setNewCode}
+                        w="w-90"
                       />
                       <InputWithLabel
                         label="Modelo"
                         placeholder="Digite o novo modelo aqui"
                         value={newModel}
                         setValue={setNewModel}
+                        w="w-90"
                       />
                       <InputWithLabel
                         label="Status"
@@ -576,7 +585,7 @@ export default function Home() {
                         value={newSerialNumber}
                         setValue={setNewSerialNumber}
                       />
-                      <div className="flex flex-col">
+                      <div className="flex flex-col w-200">
                         <label className="text-sm font-semibold">Descrição</label>
                         <Textarea
                           placeholder="Digite a nova descrição aqui"
@@ -585,7 +594,7 @@ export default function Home() {
                           onChange={((ev: ChangeEvent<HTMLTextAreaElement>) => setNewDescription(ev.target.value))}
                         />
                       </div>
-                      <div className="flex flex-col">
+                      <div className="flex flex-col w-full">
                         <label className="text-sm font-semibold">Observação</label>
                         <Textarea
                           placeholder="Se tiver alguma observação digite aqui"
@@ -594,7 +603,7 @@ export default function Home() {
                           onChange={((ev: ChangeEvent<HTMLTextAreaElement>) => setNewObservation(ev.target.value))}
                         />
                       </div>
-                      <div className="flex justify-end">
+                      <div className="flex w-full justify-end">
                         <Button
                           variant={"default"}
                           className="cursor-pointer bg-blue-500  w-28 text-white"
@@ -688,6 +697,12 @@ export default function Home() {
                   placeholder="Digite aqui a nova tolerância do processo"
                   value={toleranceProcess}
                   setValue={setToleranceProcess}
+                />
+                <InputWithLabel
+                  label="Tolerância do equipamento"
+                  placeholder="Digite aqui a nova tolerância do equipamento"
+                  value={toleranceEquipment}
+                  setValue={setToleranceEquipment}
                 />
                 <div className="flex justify-end">
                   <Button
@@ -837,6 +852,13 @@ export default function Home() {
                   placeholder="Digite aqui a nova tolerância do processo"
                   value={newProcessTolerance}
                   setValue={setNewProcessTolerance}
+                  w="w-full"
+                />
+                <InputWithLabel
+                  label="Tolerância do processo"
+                  placeholder="Digite aqui a nova tolerância do equipamento"
+                  value={newProcessEquipment}
+                  setValue={setNewProcessEquipment}
                   w="w-full"
                 />
               </CardContent>
