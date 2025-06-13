@@ -855,7 +855,7 @@ export default function Home() {
                   w="w-full"
                 />
                 <InputWithLabel
-                  label="Tolerância do processo"
+                  label="Tolerância do equipamento"
                   placeholder="Digite aqui a nova tolerância do equipamento"
                   value={newProcessEquipment}
                   setValue={setNewProcessEquipment}
